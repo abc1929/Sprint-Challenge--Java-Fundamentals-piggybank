@@ -3,11 +3,14 @@ package com.lambdaschool.piggybank.controllers;
 import com.lambdaschool.piggybank.models.Piggybank;
 import com.lambdaschool.piggybank.repositories.PiggybankRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.querydsl.QSort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -46,7 +49,7 @@ public class PiggybankController {
     public ResponseEntity<?> updateCoin(@PathVariable double amount) throws Exception {
 
         // 0.01 0.05 0.1 0.25 1
-        int[] init = {0, 0, 0, 0, 0};
+        int [] init = {0, 0, 0, 0, 0};
 
 
         piggyrepo.findAll().iterator().forEachRemaining(i -> {
@@ -72,18 +75,35 @@ public class PiggybankController {
         });
 
 //        System.out.println(init[0] + " " + init[1] + " " + init[2] + " " + init[3] + " " + init[4]);
+        DecimalFormat df = new DecimalFormat("##.##");
+        df.setRoundingMode(RoundingMode.HALF_EVEN);
 
-        HashMap<Double, Integer[]> allcombo = new HashMap<>();
+        HashMap<String, Integer[]> allcombo = new HashMap<>();
+
         // brute force for now
-        for (int i0 = 0; i0 < init[0]; i0++) {
-            for (int i1 = 0; i1 < init[1]; i1++) {
-                for (int i2 = 0; i2 < init[2]; i2++) {
-                    for (int i3 = 0; i3 < init[3]; i3++) {
-                        for (int i4 = 0; i4 < init[4]; i4++) {
+//        HashMap<String, Integer> temp = new HashMap<>();
+//
+//        for (int i = 0; i < init.length; i++) {
+//            switch (i){
+//                case 0: temp.put("0.01",init[0]);break;
+//                case 1: temp.put("0.05",init[1]);break;
+//                case 2: temp.put("0.10",init[2]);break;
+//                case 3: temp.put("0.25",init[3]);break;
+//                case 4: temp.put("1.0",init[4]);break;
+//                default: break;
+//            }
+//        }
+
+
+        for (int i0 = 0; i0 <= init[0]; i0++) {
+            for (int i1 = 0; i1 <= init[1]; i1++) {
+                for (int i2 = 0; i2 <= init[2]; i2++) {
+                    for (int i3 = 0; i3 <= init[3]; i3++) {
+                        for (int i4 = 0; i4 <= init[4]; i4++) {
                             double key = i0 * 0.01 + i1 * 0.05 + i2 * 0.1 + i3 * 0.25 + i4;
-                            if (allcombo.get(key) == null) {
+                            if (allcombo.get(df.format(key)) == null) {
                                 // we just set one solution on the fly
-                                allcombo.put(key, new Integer[]{i0, i1, i2, i3, i4});
+                                allcombo.put(df.format(key), new Integer[]{i0, i1, i2, i3, i4});
                             }
                         }
                     }
@@ -100,10 +120,10 @@ public class PiggybankController {
 //            (5, 'Dime', 'Dimes', 0.10, 7),
 //            (6, 'Dollar', 'Dollars', 1.00, 1),
 //            (7, 'Penny', 'Pennies', 0.01, 10);
-        var a = allcombo.get(amount);
+        var a = allcombo.get(df.format(amount));
 
 
-        if (allcombo.get(amount) != null) {
+        if (allcombo.get(df.format(amount)) != null) {
 
             for (int i = 0; i < a.length; i++) {
                 if (a[i] != 0) {
@@ -188,10 +208,11 @@ public class PiggybankController {
             Piggybank x = piggyrepo.findById(xx).get();
 
             if (x.getQuantity() < a[i]) {
+                long removedFromX = x.getQuantity();
                 x.setQuantity(0);
                 piggyrepo.save(x);
                 Piggybank y = piggyrepo.findById(myList.stream().filter(j -> j.getNameplural().equals(finalH)).collect(Collectors.toList()).get(1).getId()).get();
-                y.setQuantity(y.getQuantity() - (a[i] - x.getQuantity()));
+                y.setQuantity(y.getQuantity() - (a[i] - removedFromX));
                 piggyrepo.save(y);
             } else {
                 x.setQuantity(x.getQuantity() - a[i]);
