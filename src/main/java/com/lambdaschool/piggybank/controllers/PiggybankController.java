@@ -112,6 +112,7 @@ public class PiggybankController {
                             System.out.println("Removing " + a[i] + " Pennies");
 //                            piggyrepo.saveAll(RemoveCoins(myList, a, 0));
                             RemoveCoins(myList,a,0);
+                            break;
                         }
                         case 1: {
                             System.out.println("Removing " + a[i] + " Nickels");
