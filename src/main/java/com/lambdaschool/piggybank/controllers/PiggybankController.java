@@ -71,7 +71,7 @@ public class PiggybankController {
             }
         });
 
-        System.out.println(init[0] + " " + init[1] + " " + init[2] + " " + init[3] + " " + init[4]);
+//        System.out.println(init[0] + " " + init[1] + " " + init[2] + " " + init[3] + " " + init[4]);
 
         HashMap<Double, Integer[]> allcombo = new HashMap<>();
         // brute force for now
@@ -110,26 +110,31 @@ public class PiggybankController {
                     switch (i) {
                         case 0: {
                             System.out.println("Removing " + a[i] + " Pennies");
-                            piggyrepo.saveAll(RemoveCoins(myList, a, 0));
+//                            piggyrepo.saveAll(RemoveCoins(myList, a, 0));
+                            RemoveCoins(myList,a,0);
                         }
                         case 1: {
                             System.out.println("Removing " + a[i] + " Nickels");
-                            piggyrepo.saveAll(RemoveCoins(myList, a, 1));
+//                            piggyrepo.saveAll(RemoveCoins(myList, a, 1));
+                            RemoveCoins(myList,a,1);
                             break;
                         }
                         case 2: {
                             System.out.println("Removing " + a[i] + " Dimes");
-                            piggyrepo.saveAll(RemoveCoins(myList, a, 2));
+//                            piggyrepo.saveAll(RemoveCoins(myList, a, 2));
+                            RemoveCoins(myList,a,2);
                             break;
                         }
                         case 3: {
                             System.out.println("Removing " + a[i] + " Quarters");
-                            piggyrepo.saveAll(RemoveCoins(myList, a, 3));
+//                            piggyrepo.saveAll(RemoveCoins(myList, a, 3));
+                            RemoveCoins(myList,a,3);
                             break;
                         }
                         case 4: {
                             System.out.println("Removing " + a[i] + " Dollars");
-                            piggyrepo.saveAll(RemoveCoins(myList, a, 4));
+//                            piggyrepo.saveAll(RemoveCoins(myList, a, 4));
+                            RemoveCoins(myList,a,4);
                             break;
                         }
                         default:
@@ -143,6 +148,7 @@ public class PiggybankController {
             return ResponseEntity.ok("Money not available");
         }
 
+        System.out.println("The piggy bank holds " + myList.stream().map(i -> i.getValue() * i.getQuantity()).reduce(Double::sum).get());
 
         return ResponseEntity.ok(piggyrepo.findAll());
 
@@ -150,8 +156,8 @@ public class PiggybankController {
     }
 
 
-
-    private List<Piggybank> RemoveCoins(List<Piggybank> myList, Integer[] a, int i) {
+//List<Piggybank>
+    private void RemoveCoins(List<Piggybank> myList, Integer[] a, int i) {
         String h = "";
         switch (i) {
             case 0:
@@ -180,18 +186,18 @@ public class PiggybankController {
         if (piggyrepo.findById(xx).isPresent()) {
             Piggybank x = piggyrepo.findById(xx).get();
 
-            if (x.getQuantity() < a[0]) {
+            if (x.getQuantity() < a[i]) {
                 x.setQuantity(0);
                 piggyrepo.save(x);
                 Piggybank y = piggyrepo.findById(myList.stream().filter(j -> j.getNameplural().equals(finalH)).collect(Collectors.toList()).get(1).getId()).get();
-                y.setQuantity(y.getQuantity() - (a[0] - x.getQuantity()));
+                y.setQuantity(y.getQuantity() - (a[i] - x.getQuantity()));
                 piggyrepo.save(y);
             } else {
-                x.setQuantity(x.getQuantity() - a[0]);
+                x.setQuantity(x.getQuantity() - a[i]);
                 piggyrepo.save(x);
             }
         }
-        return myList;
+//        return myList;
 
 
     }
