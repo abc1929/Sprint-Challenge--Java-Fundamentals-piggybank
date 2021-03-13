@@ -17,6 +17,9 @@ import java.util.stream.Collectors;
 @RestController
 public class PiggybankController {
 
+    @Autowired
+    PiggybankRepository piggyrepo;
+
     public static String GetLine(Piggybank i) {
         if (i.getQuantity() > 1) {
             return i.getQuantity() + " " + i.getNameplural();
@@ -24,10 +27,6 @@ public class PiggybankController {
         return i.getQuantity() + " " + i.getName();
 
     }
-
-    @Autowired
-    PiggybankRepository piggyrepo;
-
 
     @GetMapping(value = "/total", produces = {"application/json"})
     public ResponseEntity<?> GetTotal() {
@@ -49,7 +48,7 @@ public class PiggybankController {
     public ResponseEntity<?> updateCoin(@PathVariable double amount) throws Exception {
 
         // 0.01 0.05 0.1 0.25 1
-        int [] init = {0, 0, 0, 0, 0};
+        int[] init = {0, 0, 0, 0, 0};
 
 
         piggyrepo.findAll().iterator().forEachRemaining(i -> {
@@ -74,27 +73,13 @@ public class PiggybankController {
             }
         });
 
-//        System.out.println(init[0] + " " + init[1] + " " + init[2] + " " + init[3] + " " + init[4]);
         DecimalFormat df = new DecimalFormat("##.##");
         df.setRoundingMode(RoundingMode.HALF_EVEN);
 
         HashMap<String, Integer[]> allcombo = new HashMap<>();
 
-        // brute force for now
-//        HashMap<String, Integer> temp = new HashMap<>();
-//
-//        for (int i = 0; i < init.length; i++) {
-//            switch (i){
-//                case 0: temp.put("0.01",init[0]);break;
-//                case 1: temp.put("0.05",init[1]);break;
-//                case 2: temp.put("0.10",init[2]);break;
-//                case 3: temp.put("0.25",init[3]);break;
-//                case 4: temp.put("1.0",init[4]);break;
-//                default: break;
-//            }
-//        }
-
-
+        // brute force to get all possible combinations;
+        //
         for (int i0 = 0; i0 <= init[0]; i0++) {
             for (int i1 = 0; i1 <= init[1]; i1++) {
                 for (int i2 = 0; i2 <= init[2]; i2++) {
@@ -113,13 +98,7 @@ public class PiggybankController {
 
         List<Piggybank> myList = new ArrayList<>();
         piggyrepo.findAll().iterator().forEachRemaining(myList::add);
-//           (1, 'Quarter', 'Quarters', 0.25, 1),
-//            (2, 'Dime', 'Dimes', 0.10, 1),
-//            (3, 'Dollar', 'Dollars', 1.00, 5),
-//            (4, 'Nickel', 'Nickels', 0.05, 3),
-//            (5, 'Dime', 'Dimes', 0.10, 7),
-//            (6, 'Dollar', 'Dollars', 1.00, 1),
-//            (7, 'Penny', 'Pennies', 0.01, 10);
+
         var a = allcombo.get(df.format(amount));
 
 
@@ -130,32 +109,27 @@ public class PiggybankController {
                     switch (i) {
                         case 0: {
                             System.out.println("Removing " + a[i] + " Pennies");
-//                            piggyrepo.saveAll(RemoveCoins(myList, a, 0));
-                            RemoveCoins(myList,a,0);
+                            RemoveCoins(myList, a, 0);
                             break;
                         }
                         case 1: {
                             System.out.println("Removing " + a[i] + " Nickels");
-//                            piggyrepo.saveAll(RemoveCoins(myList, a, 1));
-                            RemoveCoins(myList,a,1);
+                            RemoveCoins(myList, a, 1);
                             break;
                         }
                         case 2: {
                             System.out.println("Removing " + a[i] + " Dimes");
-//                            piggyrepo.saveAll(RemoveCoins(myList, a, 2));
-                            RemoveCoins(myList,a,2);
+                            RemoveCoins(myList, a, 2);
                             break;
                         }
                         case 3: {
                             System.out.println("Removing " + a[i] + " Quarters");
-//                            piggyrepo.saveAll(RemoveCoins(myList, a, 3));
-                            RemoveCoins(myList,a,3);
+                            RemoveCoins(myList, a, 3);
                             break;
                         }
                         case 4: {
                             System.out.println("Removing " + a[i] + " Dollars");
-//                            piggyrepo.saveAll(RemoveCoins(myList, a, 4));
-                            RemoveCoins(myList,a,4);
+                            RemoveCoins(myList, a, 4);
                             break;
                         }
                         default:
@@ -163,7 +137,6 @@ public class PiggybankController {
                     }
                 }
             }
-
 
         } else {
             return ResponseEntity.ok("Money not available");
@@ -177,7 +150,6 @@ public class PiggybankController {
     }
 
 
-//List<Piggybank>
     private void RemoveCoins(List<Piggybank> myList, Integer[] a, int i) {
         String h = "";
         switch (i) {
@@ -201,7 +173,7 @@ public class PiggybankController {
         }
 
         String finalH = h;
-        // hacking a bit here since we know we have up to duplicates of 2;
+        // we have up to two entries for any coin type
 
         var xx = myList.stream().filter(j -> j.getNameplural().equals(finalH)).collect(Collectors.toList()).get(0).getId();
         if (piggyrepo.findById(xx).isPresent()) {
@@ -219,7 +191,6 @@ public class PiggybankController {
                 piggyrepo.save(x);
             }
         }
-//        return myList;
 
 
     }
